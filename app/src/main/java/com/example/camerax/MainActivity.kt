@@ -51,8 +51,8 @@ class MainActivity : AppCompatActivity() {
 
         // Set up the listeners for take photo and video capture buttons
         viewBinding.imageCaptureButton.setOnClickListener { takePhoto() }
-        viewBinding.videoCaptureButton.setOnClickListener { flipCamera() }
-
+        viewBinding.videoCaptureButton.setOnClickListener { captureVideo() }
+        viewBinding.videoCaptureSwitch.setOnClickListener { flipCamera() }
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
