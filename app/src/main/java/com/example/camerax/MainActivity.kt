@@ -1,6 +1,5 @@
 package com.example.camerax
 
-import com.example.camerax.databinding.ActivityMainBinding
 import android.Manifest
 import android.content.ContentValues
 import android.content.pm.PackageManager
@@ -16,6 +15,7 @@ import androidx.camera.video.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
+import com.example.camerax.databinding.ActivityMainBinding
 import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.*
@@ -23,9 +23,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 typealias LumaListener = (luma: Double) -> Unit
-// hi
-// hi man, 123
-// hi phu, 123, 123445712
+
 class MainActivity : AppCompatActivity() {
     private lateinit var viewBinding: ActivityMainBinding
 
@@ -35,6 +33,8 @@ class MainActivity : AppCompatActivity() {
     private var recording: Recording? = null
 
     private lateinit var cameraExecutor: ExecutorService
+    private lateinit var cameraProvider: ProcessCameraProvider
+    private var lensFacing = CameraSelector.DEFAULT_FRONT_CAMERA
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
 
         // Set up the listeners for take photo and video capture buttons
         viewBinding.imageCaptureButton.setOnClickListener { takePhoto() }
-        viewBinding.videoCaptureButton.setOnClickListener { captureVideo() }
+        viewBinding.videoCaptureButton.setOnClickListener { flipCamera() }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
@@ -181,12 +181,20 @@ class MainActivity : AppCompatActivity() {
                 }
             }
     }
+
+    private fun flipCamera() {
+        if (lensFacing == CameraSelector.DEFAULT_FRONT_CAMERA) lensFacing =
+            CameraSelector.DEFAULT_BACK_CAMERA else if (lensFacing == CameraSelector.DEFAULT_BACK_CAMERA) lensFacing =
+            CameraSelector.DEFAULT_FRONT_CAMERA
+        startCamera()
+    }
+
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
-            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            cameraProvider = cameraProviderFuture.get()
 
             // Preview
             val preview = Preview.Builder()
@@ -215,7 +223,7 @@ class MainActivity : AppCompatActivity() {
             */
 
             // Select back camera as a default
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+            val cameraSelector = lensFacing
 
             try {
                 // Unbind use cases before rebinding
