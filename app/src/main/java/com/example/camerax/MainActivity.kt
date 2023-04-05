@@ -5,8 +5,10 @@ import android.content.ContentValues
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.provider.MediaStore
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
@@ -32,9 +34,12 @@ class MainActivity : AppCompatActivity() {
     private var videoCapture: VideoCapture<Recorder>? = null
     private var recording: Recording? = null
 
+    private val duration: Long = 15000
+    private var lensFacing = CameraSelector.DEFAULT_FRONT_CAMERA
+
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var cameraProvider: ProcessCameraProvider
-    private var lensFacing = CameraSelector.DEFAULT_FRONT_CAMERA
+    private lateinit var countDownTimer: CountDownTimer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +56,7 @@ class MainActivity : AppCompatActivity() {
 
         // Set up the listeners for take photo and video capture buttons
         viewBinding.imageCaptureButton.setOnClickListener { takePhoto() }
-        viewBinding.videoCaptureButton.setOnClickListener { captureVideo() }
+        viewBinding.btnVideoCapture.setOnClickListener { captureVideo() }
         viewBinding.videoCaptureSwitch.setOnClickListener { flipCamera() }
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
@@ -117,15 +122,49 @@ class MainActivity : AppCompatActivity() {
     private fun captureVideo() {
         val videoCapture = this.videoCapture ?: return
 
-        viewBinding.videoCaptureButton.isEnabled = false
-
         val curRecording = recording
         if (curRecording != null) {
             // Stop the current recording session.
             curRecording.stop()
             recording = null
+
+            // Cancel the countdown timer
+            countDownTimer.cancel()
+
+            viewBinding.btnVideoCapture.isEnabled = true
+            viewBinding.progressBar.visibility = View.INVISIBLE
             return
         }
+
+        viewBinding.btnVideoCapture.isEnabled = false
+        viewBinding.progressBar.visibility = View.VISIBLE
+
+        // Create a CountDownTimer with an interval of 1 second
+        countDownTimer = object : CountDownTimer(2000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                // Update the progress bar based on the remaining time
+                val progress = ((duration - millisUntilFinished) * 100 / duration).toInt()
+                viewBinding.progressBar.progress = progress
+            }
+
+            override fun onFinish() {
+                // Reset the progress bar
+                viewBinding.progressBar.progress = 0
+                viewBinding.progressBar.visibility = View.INVISIBLE
+                viewBinding.btnVideoCapture.isEnabled = true
+
+                // Stop the current recording session.
+                recording?.stop()
+                recording = null
+
+                // Cancel the countdown timer
+                countDownTimer.cancel()
+                return
+            }
+        }
+
+        // Start the countdown
+        countDownTimer.start()
 
         // create and start a new recording session
         val name = SimpleDateFormat(FILENAME_FORMAT, Locale.US)
@@ -155,7 +194,7 @@ class MainActivity : AppCompatActivity() {
             .start(ContextCompat.getMainExecutor(this)) { recordEvent ->
                 when(recordEvent) {
                     is VideoRecordEvent.Start -> {
-                        viewBinding.videoCaptureButton.apply {
+                        viewBinding.btnVideoCapture.apply {
 //                            text = getString(R.string.stop_capture)
                             isEnabled = true
                         }
@@ -170,11 +209,13 @@ class MainActivity : AppCompatActivity() {
                         } else {
                             recording?.close()
                             recording = null
-                            Log.e(TAG, "Video capture ends with error: " +
-                                    "${recordEvent.error}")
+                            val msg = "Video capture ends with error: " +
+                                    "${recordEvent.error}"
+                            Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT)
+                                .show()
+                            Log.d(TAG, msg)
                         }
-                        viewBinding.videoCaptureButton.apply {
-//                            text = getString(R.string.start_capture)
+                        viewBinding.btnVideoCapture.apply {
                             isEnabled = true
                         }
                     }
