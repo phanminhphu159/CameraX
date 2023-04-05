@@ -25,7 +25,7 @@ import java.util.concurrent.Executors
 typealias LumaListener = (luma: Double) -> Unit
 // hi
 // hi man, 123
-// hi phu
+// hi phu, 123
 class MainActivity : AppCompatActivity() {
     private lateinit var viewBinding: ActivityMainBinding
 
