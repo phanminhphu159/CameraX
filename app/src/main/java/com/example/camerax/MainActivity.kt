@@ -156,7 +156,7 @@ class MainActivity : AppCompatActivity() {
                 when(recordEvent) {
                     is VideoRecordEvent.Start -> {
                         viewBinding.videoCaptureButton.apply {
-                            text = getString(R.string.stop_capture)
+//                            text = getString(R.string.stop_capture)
                             isEnabled = true
                         }
                     }
@@ -174,7 +174,7 @@ class MainActivity : AppCompatActivity() {
                                     "${recordEvent.error}")
                         }
                         viewBinding.videoCaptureButton.apply {
-                            text = getString(R.string.start_capture)
+//                            text = getString(R.string.start_capture)
                             isEnabled = true
                         }
                     }
