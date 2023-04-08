@@ -44,18 +44,17 @@
 
         <ProgressBar
             android:id="@+id/progress_bar"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:indeterminate="false"
+            style="?android:progressBarStyleHorizontal"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:max="100"
-            android:progress="50"
             android:progressDrawable="@drawable/progress_circle"
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@id/guideLineHorizontal0.90"
             app:layout_constraintEnd_toEndOf="@+id/guideLineVertical0.50"
             app:layout_constraintStart_toStartOf="@+id/guideLineVertical0.50"
-            app:layout_constraintTop_toTopOf="@id/guideLineHorizontal0.90" />
+            app:layout_constraintTop_toTopOf="@id/guideLineHorizontal0.90"
+            tools:visibility="visible" />
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/btnVideoCapture"

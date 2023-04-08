@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity() {
         viewBinding.progressBar.visibility = View.VISIBLE
 
         // Create a CountDownTimer with an interval of 1 second
-        countDownTimer = object : CountDownTimer(2000, 1000) {
+        countDownTimer = object : CountDownTimer(duration, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 // Update the progress bar based on the remaining time
                 val progress = ((duration - millisUntilFinished) * 100 / duration).toInt()
